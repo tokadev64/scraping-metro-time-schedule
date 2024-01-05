@@ -5,6 +5,8 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as pdfjsLib from 'pdfjs-dist';
 
+// TODO: 「図書館行」車両に対応したい
+
 const filenames = [...Array(24)].map((_, i: number) =>
 	(i + 1).toString().padStart(4, 'sc0'),
 );
@@ -67,15 +69,14 @@ const extractTextFromPDF = async (filename, pdfname): Promise<string> => {
 		timeSchedules[schedule_key].push({ hour: hours[hour_key], minutes: t });
 	});
 
+	const obj = {};
+	const keys = ['upWeekday', 'upHoliday', 'downWeekday', 'downHoliday'];
+	keys.forEach((key, i) => {
+		obj[key] = timeSchedules[i];
+	});
+
 	const encoder = new TextEncoder();
-	Deno.writeFile(
-		`json/${filename}_weekday.json`,
-		encoder.encode(JSON.stringify(timeSchedules[0].concat(timeSchedules[1]))),
-	);
-	Deno.writeFile(
-		`json/${filename}_holiday.json`,
-		encoder.encode(JSON.stringify(timeSchedules[2].concat(timeSchedules[3]))),
-	);
+	Deno.writeFile(`json/${filename}.json`, encoder.encode(JSON.stringify(obj)));
 	return JSON.stringify(timeSchedules);
 };
 
